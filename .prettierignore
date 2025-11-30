@@ -1,0 +1,16 @@
+# Build outputs
+dist/
+out/
+
+# Dependencies
+node_modules/
+
+# Generated files
+*.d.ts
+*.vsix
+
+# Lock files
+package-lock.json
+
+# Coverage
+coverage/

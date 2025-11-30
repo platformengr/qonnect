@@ -1,0 +1,897 @@
+{
+  "name": "qonnect",
+  "displayName": "Qonnect",
+  "description": "Connect to PostgreSQL, MySQL, MongoDB, Redis & more. Query with Copilot AI, manage Docker databases, and explore your data visually.",
+  "version": "0.1.0",
+  "publisher": "platformengr",
+  "license": "MIT",
+  "homepage": "https://qonnect.platformengr.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/platformengr/qonnect"
+  },
+  "bugs": {
+    "url": "https://github.com/platformengr/qonnect/issues"
+  },
+  "author": {
+    "name": "PlatformEngr",
+    "url": "https://www.platformengr.com"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Data Science"
+  ],
+  "keywords": [
+    "database",
+    "postgresql",
+    "postgres",
+    "mysql",
+    "mongodb",
+    "redis",
+    "sql",
+    "docker",
+    "copilot",
+    "query",
+    "database client",
+    "db"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "qonnect",
+          "title": "Qonnect",
+          "icon": "resources/icons/database.svg"
+        }
+      ]
+    },
+    "views": {
+      "qonnect": [
+        {
+          "id": "databaseConnections",
+          "name": "Connections"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "databaseConnections",
+        "contents": "No database connections yet.\n[Add Connection](command:qonnect.addConnection)\n\nOr create a database with Docker:\n[Create Database Container](command:qonnect.dockerCreate)"
+      }
+    ],
+    "commands": [
+      {
+        "command": "qonnect.addConnection",
+        "title": "Add Connection",
+        "icon": "$(add)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.refreshConnections",
+        "title": "Refresh Connections",
+        "icon": "$(refresh)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.refreshItem",
+        "title": "Refresh",
+        "icon": "$(refresh)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.editConnection",
+        "title": "Edit Connection",
+        "icon": "$(edit)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.deleteConnection",
+        "title": "Delete Connection",
+        "icon": "$(trash)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.connect",
+        "title": "Connect",
+        "icon": "$(plug)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.disconnect",
+        "title": "Disconnect",
+        "icon": "$(debug-disconnect)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.newQuery",
+        "title": "New Query",
+        "icon": "$(add)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.saveQuery",
+        "title": "Save Query",
+        "icon": "$(save)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.openSavedQuery",
+        "title": "Open Query",
+        "icon": "$(file-code)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.deleteSavedQuery",
+        "title": "Delete Query",
+        "icon": "$(trash)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.runQuery",
+        "title": "Run Query",
+        "icon": "$(play)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.executeQuery",
+        "title": "Execute SQL Query",
+        "icon": "$(play)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.selectConnection",
+        "title": "Select Database Connection",
+        "icon": "$(database)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.selectDatabase",
+        "title": "Select Database",
+        "icon": "$(database)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.newSqlFile",
+        "title": "New SQL File",
+        "icon": "$(new-file)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.viewTableData",
+        "title": "View Data",
+        "icon": "$(table)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.viewObject",
+        "title": "View Definition",
+        "icon": "$(file-code)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.createCategory",
+        "title": "Create Category",
+        "icon": "$(folder-active)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.dockerStart",
+        "title": "Start Database Container",
+        "icon": "$(debug-start)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.dockerStop",
+        "title": "Stop Database Container",
+        "icon": "$(debug-stop)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.dockerCreate",
+        "title": "Create Database Container",
+        "icon": "$(add)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.databaseOperations",
+        "title": "Database Operations",
+        "icon": "$(database)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.createTable",
+        "title": "Create Table",
+        "icon": "$(add)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.createView",
+        "title": "Create View",
+        "icon": "$(add)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.createIndex",
+        "title": "Create Index",
+        "icon": "$(add)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.createUser",
+        "title": "Create User/Role",
+        "icon": "$(add)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.createSchema",
+        "title": "Create Schema",
+        "icon": "$(add)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.createSequence",
+        "title": "Create Sequence",
+        "icon": "$(add)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.createFunction",
+        "title": "Create Function",
+        "icon": "$(add)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.dropTable",
+        "title": "Drop Table",
+        "icon": "$(trash)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.truncateTable",
+        "title": "Truncate Table",
+        "icon": "$(warning)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.alterTable",
+        "title": "Alter Table",
+        "icon": "$(edit)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.createProcedure",
+        "title": "Create Procedure",
+        "icon": "$(add)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.createType",
+        "title": "Create Type",
+        "icon": "$(add)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.createTrigger",
+        "title": "Create Trigger",
+        "icon": "$(add)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.addColumn",
+        "title": "Add Column",
+        "icon": "$(add)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.dropView",
+        "title": "Drop View",
+        "icon": "$(trash)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.dropFunction",
+        "title": "Drop Function",
+        "icon": "$(trash)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.dropSequence",
+        "title": "Drop Sequence",
+        "icon": "$(trash)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.dropIndex",
+        "title": "Drop Index",
+        "icon": "$(trash)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.dropColumn",
+        "title": "Drop Column",
+        "icon": "$(trash)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.dropTrigger",
+        "title": "Drop Trigger",
+        "icon": "$(trash)",
+        "category": "Qonnect"
+      },
+      {
+        "command": "qonnect.dropUser",
+        "title": "Drop User/Role",
+        "icon": "$(trash)",
+        "category": "Qonnect"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "qonnect.executeQuery",
+        "key": "ctrl+enter",
+        "mac": "cmd+enter",
+        "when": "editorLangId == sql"
+      },
+      {
+        "command": "qonnect.executeQuery",
+        "key": "f5",
+        "when": "editorLangId == sql"
+      },
+      {
+        "command": "qonnect.selectConnection",
+        "key": "ctrl+shift+c",
+        "mac": "cmd+shift+c",
+        "when": "editorLangId == sql"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "qonnect.executeQuery",
+          "when": "editorLangId == sql",
+          "group": "navigation@1"
+        },
+        {
+          "command": "qonnect.selectConnection",
+          "when": "editorLangId == sql",
+          "group": "navigation@2"
+        },
+        {
+          "command": "qonnect.selectDatabase",
+          "when": "editorLangId == sql",
+          "group": "navigation@3"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "qonnect.executeQuery",
+          "when": "editorLangId == sql",
+          "group": "navigation@1"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "qonnect.addConnection",
+          "when": "view == databaseConnections",
+          "group": "navigation@1"
+        },
+        {
+          "command": "qonnect.createCategory",
+          "when": "view == databaseConnections",
+          "group": "navigation@2"
+        },
+        {
+          "command": "qonnect.refreshConnections",
+          "when": "view == databaseConnections",
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "qonnect.connect",
+          "when": "view == databaseConnections && viewItem == connection-disconnected",
+          "group": "inline@1"
+        },
+        {
+          "command": "qonnect.disconnect",
+          "when": "view == databaseConnections && viewItem == connection-connected",
+          "group": "inline@1"
+        },
+        {
+          "command": "qonnect.refreshItem",
+          "when": "view == databaseConnections && viewItem == connection-connected",
+          "group": "inline@2"
+        },
+        {
+          "command": "qonnect.newQuery",
+          "when": "view == databaseConnections && viewItem =~ /connection-/",
+          "group": "inline@3"
+        },
+        {
+          "command": "qonnect.refreshItem",
+          "when": "view == databaseConnections && viewItem =~ /connection-/",
+          "group": "connection@0"
+        },
+        {
+          "command": "qonnect.editConnection",
+          "when": "view == databaseConnections && viewItem =~ /connection-/",
+          "group": "connection@1"
+        },
+        {
+          "command": "qonnect.deleteConnection",
+          "when": "view == databaseConnections && viewItem =~ /connection-/",
+          "group": "connection@2"
+        },
+        {
+          "command": "qonnect.viewTableData",
+          "when": "view == databaseConnections && viewItem == table",
+          "group": "inline@1"
+        },
+        {
+          "command": "qonnect.databaseOperations",
+          "when": "view == databaseConnections && viewItem =~ /connection-connected/",
+          "group": "operations@1"
+        },
+        {
+          "command": "qonnect.createSchema",
+          "when": "view == databaseConnections && viewItem == database",
+          "group": "inline@1"
+        },
+        {
+          "command": "qonnect.refreshItem",
+          "when": "view == databaseConnections && viewItem == database",
+          "group": "inline@2"
+        },
+        {
+          "command": "qonnect.createSchema",
+          "when": "view == databaseConnections && viewItem == database",
+          "group": "create@1"
+        },
+        {
+          "command": "qonnect.refreshItem",
+          "when": "view == databaseConnections && viewItem == database",
+          "group": "create@0"
+        },
+        {
+          "command": "qonnect.newQuery",
+          "when": "view == databaseConnections && viewItem == saved-queries-folder",
+          "group": "inline@1"
+        },
+        {
+          "command": "qonnect.refreshItem",
+          "when": "view == databaseConnections && viewItem == saved-queries-folder",
+          "group": "inline@2"
+        },
+        {
+          "command": "qonnect.newQuery",
+          "when": "view == databaseConnections && viewItem == saved-queries-folder",
+          "group": "create@1"
+        },
+        {
+          "command": "qonnect.openSavedQuery",
+          "when": "view == databaseConnections && viewItem == saved-query",
+          "group": "query@1"
+        },
+        {
+          "command": "qonnect.deleteSavedQuery",
+          "when": "view == databaseConnections && viewItem == saved-query",
+          "group": "destructive@1"
+        },
+        {
+          "command": "qonnect.createUser",
+          "when": "view == databaseConnections && viewItem == security-folder",
+          "group": "inline@1"
+        },
+        {
+          "command": "qonnect.refreshItem",
+          "when": "view == databaseConnections && viewItem == security-folder",
+          "group": "inline@2"
+        },
+        {
+          "command": "qonnect.createUser",
+          "when": "view == databaseConnections && viewItem == security-folder",
+          "group": "create@1"
+        },
+        {
+          "command": "qonnect.dropUser",
+          "when": "view == databaseConnections && viewItem == role",
+          "group": "destructive@1"
+        },
+        {
+          "command": "qonnect.createTable",
+          "when": "view == databaseConnections && viewItem == tables-folder",
+          "group": "inline@1"
+        },
+        {
+          "command": "qonnect.refreshItem",
+          "when": "view == databaseConnections && viewItem == tables-folder",
+          "group": "inline@2"
+        },
+        {
+          "command": "qonnect.createTable",
+          "when": "view == databaseConnections && viewItem == tables-folder",
+          "group": "create@1"
+        },
+        {
+          "command": "qonnect.createView",
+          "when": "view == databaseConnections && viewItem == views-folder",
+          "group": "inline@1"
+        },
+        {
+          "command": "qonnect.refreshItem",
+          "when": "view == databaseConnections && viewItem == views-folder",
+          "group": "inline@2"
+        },
+        {
+          "command": "qonnect.createView",
+          "when": "view == databaseConnections && viewItem == views-folder",
+          "group": "create@1"
+        },
+        {
+          "command": "qonnect.dropView",
+          "when": "view == databaseConnections && viewItem == view",
+          "group": "destructive@1"
+        },
+        {
+          "command": "qonnect.createFunction",
+          "when": "view == databaseConnections && viewItem == functions-folder",
+          "group": "inline@1"
+        },
+        {
+          "command": "qonnect.refreshItem",
+          "when": "view == databaseConnections && viewItem == functions-folder",
+          "group": "inline@2"
+        },
+        {
+          "command": "qonnect.createFunction",
+          "when": "view == databaseConnections && viewItem == functions-folder",
+          "group": "create@1"
+        },
+        {
+          "command": "qonnect.dropFunction",
+          "when": "view == databaseConnections && viewItem == function",
+          "group": "destructive@1"
+        },
+        {
+          "command": "qonnect.createProcedure",
+          "when": "view == databaseConnections && viewItem == procedures-folder",
+          "group": "inline@1"
+        },
+        {
+          "command": "qonnect.refreshItem",
+          "when": "view == databaseConnections && viewItem == procedures-folder",
+          "group": "inline@2"
+        },
+        {
+          "command": "qonnect.createProcedure",
+          "when": "view == databaseConnections && viewItem == procedures-folder",
+          "group": "create@1"
+        },
+        {
+          "command": "qonnect.createType",
+          "when": "view == databaseConnections && viewItem == types-folder",
+          "group": "inline@1"
+        },
+        {
+          "command": "qonnect.refreshItem",
+          "when": "view == databaseConnections && viewItem == types-folder",
+          "group": "inline@2"
+        },
+        {
+          "command": "qonnect.createType",
+          "when": "view == databaseConnections && viewItem == types-folder",
+          "group": "create@1"
+        },
+        {
+          "command": "qonnect.createSequence",
+          "when": "view == databaseConnections && viewItem == sequences-folder",
+          "group": "inline@1"
+        },
+        {
+          "command": "qonnect.refreshItem",
+          "when": "view == databaseConnections && viewItem == sequences-folder",
+          "group": "inline@2"
+        },
+        {
+          "command": "qonnect.createSequence",
+          "when": "view == databaseConnections && viewItem == sequences-folder",
+          "group": "create@1"
+        },
+        {
+          "command": "qonnect.dropSequence",
+          "when": "view == databaseConnections && viewItem == sequence",
+          "group": "destructive@1"
+        },
+        {
+          "command": "qonnect.createIndex",
+          "when": "view == databaseConnections && viewItem == index-folder",
+          "group": "inline@1"
+        },
+        {
+          "command": "qonnect.refreshItem",
+          "when": "view == databaseConnections && viewItem == index-folder",
+          "group": "inline@2"
+        },
+        {
+          "command": "qonnect.createIndex",
+          "when": "view == databaseConnections && viewItem == index-folder",
+          "group": "create@1"
+        },
+        {
+          "command": "qonnect.dropIndex",
+          "when": "view == databaseConnections && viewItem == index",
+          "group": "destructive@1"
+        },
+        {
+          "command": "qonnect.addColumn",
+          "when": "view == databaseConnections && viewItem == columns-folder",
+          "group": "inline@1"
+        },
+        {
+          "command": "qonnect.refreshItem",
+          "when": "view == databaseConnections && viewItem == columns-folder",
+          "group": "inline@2"
+        },
+        {
+          "command": "qonnect.addColumn",
+          "when": "view == databaseConnections && viewItem == columns-folder",
+          "group": "create@1"
+        },
+        {
+          "command": "qonnect.dropColumn",
+          "when": "view == databaseConnections && viewItem == column",
+          "group": "destructive@1"
+        },
+        {
+          "command": "qonnect.createTrigger",
+          "when": "view == databaseConnections && viewItem == triggers-folder",
+          "group": "inline@1"
+        },
+        {
+          "command": "qonnect.refreshItem",
+          "when": "view == databaseConnections && viewItem == triggers-folder",
+          "group": "inline@2"
+        },
+        {
+          "command": "qonnect.createTrigger",
+          "when": "view == databaseConnections && viewItem == triggers-folder",
+          "group": "create@1"
+        },
+        {
+          "command": "qonnect.dropTrigger",
+          "when": "view == databaseConnections && viewItem == trigger",
+          "group": "destructive@1"
+        },
+        {
+          "command": "qonnect.createIndex",
+          "when": "view == databaseConnections && viewItem == table",
+          "group": "table@1"
+        },
+        {
+          "command": "qonnect.alterTable",
+          "when": "view == databaseConnections && viewItem == table",
+          "group": "table@2"
+        },
+        {
+          "command": "qonnect.truncateTable",
+          "when": "view == databaseConnections && viewItem == table",
+          "group": "table@3"
+        },
+        {
+          "command": "qonnect.dropTable",
+          "when": "view == databaseConnections && viewItem == table",
+          "group": "destructive@1"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Qonnect",
+      "properties": {
+        "qonnect.connections": {
+          "type": "array",
+          "default": [],
+          "description": "Saved database connections"
+        },
+        "qonnect.categories": {
+          "type": "array",
+          "default": [],
+          "description": "Connection categories/folders"
+        },
+        "qonnect.queryHistory": {
+          "type": "array",
+          "default": [],
+          "description": "Query history"
+        },
+        "qonnect.maxRowsPerPage": {
+          "type": "number",
+          "default": 100,
+          "description": "Maximum rows to display per page"
+        },
+        "qonnect.autoConnect": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically connect to last used connection on startup"
+        }
+      }
+    },
+    "languageModelTools": [
+      {
+        "name": "database_query",
+        "displayName": "Execute Database Query",
+        "description": "Execute a SQL query on the connected database",
+        "modelDescription": "Execute a SQL query on the connected database. Use this to run SELECT, INSERT, UPDATE, DELETE, or any other SQL statement. Returns the query results or affected row count.",
+        "canBeReferencedInPrompt": true,
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "connectionId": {
+              "type": "string",
+              "description": "The ID of the database connection to use. If not provided, uses the active connection."
+            },
+            "query": {
+              "type": "string",
+              "description": "The SQL query to execute"
+            }
+          },
+          "required": [
+            "query"
+          ]
+        }
+      },
+      {
+        "name": "database_list_tables",
+        "displayName": "List Database Tables",
+        "description": "List all tables in the connected database",
+        "modelDescription": "List all tables in the connected database. Returns table names and basic information.",
+        "canBeReferencedInPrompt": true,
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "connectionId": {
+              "type": "string",
+              "description": "The ID of the database connection to use. If not provided, uses the active connection."
+            }
+          }
+        }
+      },
+      {
+        "name": "database_describe_table",
+        "displayName": "Describe Table Schema",
+        "description": "Get the schema/structure of a database table",
+        "modelDescription": "Get detailed schema information for a database table including column names, types, constraints, and indexes.",
+        "canBeReferencedInPrompt": true,
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "connectionId": {
+              "type": "string",
+              "description": "The ID of the database connection to use. If not provided, uses the active connection."
+            },
+            "tableName": {
+              "type": "string",
+              "description": "The name of the table to describe"
+            }
+          },
+          "required": [
+            "tableName"
+          ]
+        }
+      },
+      {
+        "name": "database_list_connections",
+        "displayName": "List Database Connections",
+        "description": "List all saved database connections",
+        "modelDescription": "List all saved database connections with their names, types, and connection status.",
+        "canBeReferencedInPrompt": true,
+        "inputSchema": {
+          "type": "object",
+          "properties": {}
+        }
+      },
+      {
+        "name": "docker_database_start",
+        "displayName": "Start Database Container",
+        "description": "Start a database container using Docker",
+        "modelDescription": "Start or create a database container using Docker. Supports PostgreSQL, MySQL, MongoDB, and Redis.",
+        "canBeReferencedInPrompt": true,
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "databaseType": {
+              "type": "string",
+              "enum": [
+                "postgresql",
+                "mysql",
+                "mongodb",
+                "redis"
+              ],
+              "description": "The type of database to start"
+            },
+            "containerName": {
+              "type": "string",
+              "description": "Name for the Docker container"
+            },
+            "port": {
+              "type": "number",
+              "description": "Host port to map to the database port"
+            },
+            "password": {
+              "type": "string",
+              "description": "Password for the database root/admin user"
+            }
+          },
+          "required": [
+            "databaseType"
+          ]
+        }
+      },
+      {
+        "name": "docker_database_stop",
+        "displayName": "Stop Database Container",
+        "description": "Stop a running database container",
+        "modelDescription": "Stop a running database Docker container by name.",
+        "canBeReferencedInPrompt": true,
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "containerName": {
+              "type": "string",
+              "description": "Name of the Docker container to stop"
+            }
+          },
+          "required": [
+            "containerName"
+          ]
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "lint:fix": "eslint src --ext ts --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,json}\"",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.0",
+    "@types/pg": "^8.10.9",
+    "@types/uuid": "^9.0.7",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "@vscode/test-electron": "^2.3.8",
+    "css-loader": "^6.8.1",
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "jest": "^29.7.0",
+    "prettier": "^3.7.3",
+    "style-loader": "^3.3.3",
+    "ts-jest": "^29.1.1",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.2",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "pg": "^8.11.3",
+    "uuid": "^9.0.1"
+  }
+}
