@@ -870,6 +870,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",
+    "@types/mysql": "^2.15.27",
     "@types/node": "^20.10.0",
     "@types/pg": "^8.10.9",
     "@types/uuid": "^9.0.7",
@@ -891,6 +892,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "mysql2": "^3.15.3",
     "pg": "^8.11.3",
     "uuid": "^9.0.1"
   }

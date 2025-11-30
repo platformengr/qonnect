@@ -7,6 +7,9 @@ import {
   QueryOptions,
 } from '../../types';
 
+// Import database client-specific types
+import type { TriggerInfo, DatabaseInfo, RoleInfo, SchemaObjects } from '../types';
+
 /**
  * Interface for database client implementations
  * Each database type (PostgreSQL, MySQL, etc.) must implement this interface
@@ -64,6 +67,31 @@ export interface IDatabaseClient {
    * @param databaseName - Optional database name (uses default if not specified)
    */
   getSchemas(databaseName?: string): Promise<string[]>;
+
+  /**
+   * Get list of databases
+   */
+  getDatabases(): Promise<DatabaseInfo[]>;
+
+  /**
+   * Get list of roles/users
+   */
+  getRoles(): Promise<RoleInfo[]>;
+
+  /**
+   * Get schema objects (tables, views, functions, procedures)
+   * @param databaseName - The database name
+   * @param schemaName - Optional schema name (PostgreSQL only, MySQL ignores this)
+   */
+  getSchemaObjects(databaseName: string, schemaName?: string): Promise<SchemaObjects>;
+
+  /**
+   * Get triggers for a table
+   * @param databaseName - The database containing the table
+   * @param tableName - The table name
+   * @param schema - Optional schema name (PostgreSQL only)
+   */
+  getTriggers(databaseName: string, tableName: string, schema?: string): Promise<TriggerInfo[]>;
 
   /**
    * Get table information

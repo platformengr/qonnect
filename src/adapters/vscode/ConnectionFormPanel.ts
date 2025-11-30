@@ -108,24 +108,50 @@ export class ConnectionFormPanel {
   }
 
   private async saveConnection(config: ConnectionConfig): Promise<void> {
-    try {
-      const connection: ConnectionConfig = {
-        ...config,
-        id: this.editingConnection?.id || uuidv4(),
-      };
+    const connection: ConnectionConfig = {
+      ...config,
+      id: this.editingConnection?.id || uuidv4(),
+    };
 
+    // Test connection before saving
+    this.sendMessage({ type: 'saveStart' });
+
+    try {
+      const success = await this.connectionManager.testConnection(connection);
+
+      if (!success) {
+        this.sendMessage({
+          type: 'saveResult',
+          success: false,
+          error: 'Could not connect to the database. Please verify your connection details.',
+        });
+        return;
+      }
+    } catch (error) {
+      this.sendMessage({
+        type: 'saveResult',
+        success: false,
+        error: `Connection failed: ${error instanceof Error ? error.message : String(error)}`,
+      });
+      return;
+    }
+
+    // Connection successful, now save
+    try {
       await this.storage.saveConnection(connection);
 
       if (this.onSaveCallback) {
         this.onSaveCallback(connection);
       }
 
-      vscode.window.showInformationMessage(`Connection "${connection.name}" saved successfully!`);
+      this.sendMessage({ type: 'saveResult', success: true });
       this.dispose();
     } catch (error) {
-      vscode.window.showErrorMessage(
-        `Failed to save connection: ${error instanceof Error ? error.message : String(error)}`
-      );
+      this.sendMessage({
+        type: 'saveResult',
+        success: false,
+        error: `Failed to save: ${error instanceof Error ? error.message : String(error)}`,
+      });
     }
   }
 
@@ -421,10 +447,10 @@ export class ConnectionFormPanel {
           <div class="db-type-name">PostgreSQL</div>
           <div class="db-type-status">Available</div>
         </div>
-        <div class="db-type-option disabled" data-type="mysql">
+        <div class="db-type-option ${connection?.type === 'mysql' ? 'selected' : ''}" data-type="mysql">
           <div class="db-type-icon">🐬</div>
           <div class="db-type-name">MySQL</div>
-          <div class="db-type-status">Coming soon</div>
+          <div class="db-type-status">Available</div>
         </div>
         <div class="db-type-option disabled" data-type="mongodb">
           <div class="db-type-icon">🍃</div>
@@ -511,10 +537,30 @@ export class ConnectionFormPanel {
         option.classList.add('selected');
         dbTypeInput.value = option.dataset.type;
         
-        // Update default port based on type
+        // Update defaults based on database type
         const portInput = document.getElementById('port');
-        const portMap = { postgresql: 5432, mysql: 3306, mongodb: 27017 };
-        portInput.value = portMap[option.dataset.type] || 5432;
+        const databaseInput = document.getElementById('database');
+        const usernameInput = document.getElementById('username');
+        
+        const defaults = {
+          postgresql: { port: 5432, database: 'postgres', username: 'postgres' },
+          mysql: { port: 3306, database: 'mysql', username: 'root' },
+          mongodb: { port: 27017, database: 'admin', username: 'admin' }
+        };
+        
+        const dbDefaults = defaults[option.dataset.type] || defaults.postgresql;
+        portInput.value = dbDefaults.port;
+        databaseInput.placeholder = dbDefaults.database;
+        usernameInput.placeholder = dbDefaults.username;
+        
+        // Update values if they match old defaults
+        const oldDefaults = Object.values(defaults);
+        if (oldDefaults.some(d => databaseInput.value === d.database)) {
+          databaseInput.value = dbDefaults.database;
+        }
+        if (oldDefaults.some(d => usernameInput.value === d.username)) {
+          usernameInput.value = dbDefaults.username;
+        }
       });
     });
 
@@ -537,11 +583,17 @@ export class ConnectionFormPanel {
       const connection = getFormData();
       if (!validateForm(connection)) return;
       
+      // Disable form while saving
+      const saveBtn = form.querySelector('button[type="submit"]');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Connecting...';
+      
       vscode.postMessage({ type: 'saveConnection', connection });
     });
 
     window.addEventListener('message', (event) => {
       const message = event.data;
+      const saveBtn = form.querySelector('button[type="submit"]');
       
       if (message.type === 'testStart') {
         testResult.className = 'test-result loading';
@@ -553,6 +605,22 @@ export class ConnectionFormPanel {
         } else {
           testResult.className = 'test-result error';
           testResult.textContent = '✗ Connection failed: ' + (message.error || 'Unknown error');
+        }
+      } else if (message.type === 'saveStart') {
+        testResult.className = 'test-result loading';
+        testResult.innerHTML = '<div class="spinner"></div><span>Verifying connection and saving...</span>';
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Connecting...';
+      } else if (message.type === 'saveResult') {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Connection';
+        
+        if (message.success) {
+          testResult.className = 'test-result success';
+          testResult.textContent = '✓ Connection saved successfully!';
+        } else {
+          testResult.className = 'test-result error';
+          testResult.textContent = '✗ ' + (message.error || 'Failed to save connection');
         }
       }
     });

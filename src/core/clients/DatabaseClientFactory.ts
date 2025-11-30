@@ -1,6 +1,7 @@
 import { IDatabaseClient, IDatabaseClientFactory } from '../interfaces';
 import { ConnectionConfig, DatabaseType } from '../../types';
 import { PostgreSQLClient } from './PostgreSQLClient';
+import { MySQLClient } from './MySQLClient';
 
 /**
  * Factory for creating database clients
@@ -21,9 +22,9 @@ export class DatabaseClientFactory implements IDatabaseClientFactory {
     switch (config.type) {
       case DatabaseType.PostgreSQL:
         return new PostgreSQLClient(config);
+      case DatabaseType.MySQL:
+        return new MySQLClient(config);
       // Future implementations:
-      // case DatabaseType.MySQL:
-      //   return new MySQLClient(config);
       // case DatabaseType.MongoDB:
       //   return new MongoDBClient(config);
       default:
@@ -32,11 +33,11 @@ export class DatabaseClientFactory implements IDatabaseClientFactory {
   }
 
   supports(type: string): boolean {
-    const supportedTypes = [DatabaseType.PostgreSQL];
+    const supportedTypes = [DatabaseType.PostgreSQL, DatabaseType.MySQL];
     return supportedTypes.includes(type as DatabaseType);
   }
 
   getSupportedTypes(): DatabaseType[] {
-    return [DatabaseType.PostgreSQL];
+    return [DatabaseType.PostgreSQL, DatabaseType.MySQL];
   }
 }

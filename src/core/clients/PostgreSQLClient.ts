@@ -12,69 +12,32 @@ import {
   QueryResult,
   QueryOptions,
 } from '../../types';
+import {
+  TriggerInfo,
+  ProcedureInfo,
+  ParameterInfo,
+  DatabaseInfo,
+  RoleInfo,
+  SchemaObjects,
+} from '../types';
 import { PostgreSQLQueries, getTypeName } from './queries';
 
 /**
- * Trigger information
+ * Type info (PostgreSQL-specific)
  */
-export interface TriggerInfo {
-  name: string;
-  table: string;
-  event: string;
-  timing: string;
-  definition?: string;
-}
-
-/**
- * Procedure information
- */
-export interface ProcedureInfo {
+export interface TypeInfo {
   name: string;
   schema: string;
-  returnType: string;
-  parameters: ParameterInfo[];
-  definition?: string;
-}
-
-/**
- * Parameter information
- */
-export interface ParameterInfo {
-  name: string;
   type: string;
-  mode: 'IN' | 'OUT' | 'INOUT';
 }
 
 /**
- * Database info
+ * Sequence info (PostgreSQL-specific)
  */
-export interface DatabaseInfo {
+export interface SequenceInfo {
   name: string;
-  owner: string;
-  encoding: string;
-  size: string;
-  isCurrent: boolean;
-}
-
-/**
- * Role/User info
- */
-export interface RoleInfo {
-  name: string;
-  isSuper: boolean;
-  canLogin: boolean;
-  canCreateDb: boolean;
-  canCreateRole: boolean;
-}
-
-/**
- * Schema objects container
- */
-export interface SchemaObjects {
-  tables: TableInfo[];
-  views: ViewInfo[];
-  functions: FunctionInfo[];
-  procedures: ProcedureInfo[];
+  dataType: string;
+  lastValue: string | null;
 }
 
 /**
@@ -378,7 +341,10 @@ export class PostgreSQLClient implements IDatabaseClient {
   // Schema Objects
   // ============================================
 
-  async getSchemaObjects(databaseName: string, schemaName: string): Promise<SchemaObjects> {
+  async getSchemaObjects(
+    databaseName: string,
+    schemaName: string = 'public'
+  ): Promise<SchemaObjects> {
     const [tables, views, functions, procedures] = await Promise.all([
       this.getTables(databaseName, schemaName),
       this.getViews(databaseName, schemaName),

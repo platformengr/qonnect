@@ -1,16 +1,11 @@
 import * as vscode from 'vscode';
 import { ConnectionManager } from '../../core/services';
-import { IConnectionStorage } from '../../core/interfaces';
-import {
-  PostgreSQLClient,
-  TriggerInfo,
-  ProcedureInfo,
-  DatabaseInfo,
-  RoleInfo,
-} from '../../core/clients/PostgreSQLClient';
+import { IConnectionStorage, IDatabaseClient } from '../../core/interfaces';
+import { TriggerInfo, ProcedureInfo, DatabaseInfo, RoleInfo } from '../../core';
 import {
   ConnectionConfig,
   ConnectionStatus,
+  DatabaseType,
   TableInfo,
   ColumnInfo,
   IndexInfo,
@@ -59,12 +54,12 @@ interface SchemaObjectsCache {
   procedures: ProcedureInfo[];
 }
 
-interface TypeInfo {
+interface PgTypeInfo {
   typname: string;
   type_category: string;
 }
 
-interface SequenceInfo {
+interface PgSequenceInfo {
   sequencename: string;
 }
 
@@ -123,7 +118,6 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
     if (!item.data) return;
 
     const data = item.data as Record<string, string>;
-    const connectionId = data.connectionId;
 
     if (this.isConnectionLevelItem(item)) {
       this.clearConnectionCache(item);
@@ -359,8 +353,8 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
     }
   }
 
-  private async ensureConnected(connection: ConnectionTreeItem): Promise<PostgreSQLClient | null> {
-    let client = this.connectionManager.getClient(connection.config.id) as PostgreSQLClient;
+  private async ensureConnected(connection: ConnectionTreeItem): Promise<IDatabaseClient | null> {
+    let client = this.connectionManager.getClient(connection.config.id);
 
     if (client && client.status === ConnectionStatus.Connected) {
       return client;
@@ -369,7 +363,7 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
     try {
       vscode.window.setStatusBarMessage(`Connecting to ${connection.config.name}...`, 3000);
       await this.connectionManager.connect(connection.config);
-      client = this.connectionManager.getClient(connection.config.id) as PostgreSQLClient;
+      client = this.connectionManager.getClient(connection.config.id);
 
       if (!client || client.status !== ConnectionStatus.Connected) {
         return null;
@@ -403,10 +397,7 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
     );
   }
 
-  private async cacheVersionIfNeeded(
-    connectionId: string,
-    client: PostgreSQLClient
-  ): Promise<void> {
+  private async cacheVersionIfNeeded(connectionId: string, client: IDatabaseClient): Promise<void> {
     if (this.versionCache.has(connectionId)) return;
 
     const version = await client.getVersion();
@@ -416,7 +407,7 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
 
   private async buildConnectionChildItems(
     connectionId: string,
-    client: PostgreSQLClient
+    client: IDatabaseClient
   ): Promise<DatabaseTreeItem[]> {
     const databases = await client.getDatabases();
     const items: DatabaseTreeItem[] = [];
@@ -465,7 +456,7 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
 
   private async getSecurityChildren(element: DatabaseTreeItem): Promise<DatabaseTreeItem[]> {
     const { connectionId } = element.data as { connectionId: string };
-    const client = this.connectionManager.getClient(connectionId) as PostgreSQLClient;
+    const client = this.connectionManager.getClient(connectionId);
 
     if (!client || client.status !== ConnectionStatus.Connected) {
       return [];
@@ -498,7 +489,7 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
       databaseName: string;
     };
 
-    const client = this.connectionManager.getClient(connectionId) as PostgreSQLClient;
+    const client = this.connectionManager.getClient(connectionId);
     if (!client || client.status !== ConnectionStatus.Connected) {
       return [];
     }
@@ -550,10 +541,13 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
       databaseName: string;
     };
 
-    const client = this.connectionManager.getClient(connectionId) as PostgreSQLClient;
+    const client = this.connectionManager.getClient(connectionId);
     if (!client || client.status !== ConnectionStatus.Connected) {
       return [];
     }
+
+    // Get database type from client config
+    const dbType = client.config.type || DatabaseType.PostgreSQL;
 
     try {
       const schemaData = await this.getOrCacheSchemaObjects(
@@ -565,7 +559,8 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
       const additionalData = await this.fetchAdditionalSchemaObjects(
         client,
         databaseName,
-        schemaName
+        schemaName,
+        dbType
       );
 
       return this.buildSchemaFolders(
@@ -582,7 +577,7 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
   }
 
   private async getOrCacheSchemaObjects(
-    client: PostgreSQLClient,
+    client: IDatabaseClient,
     connectionId: string,
     databaseName: string,
     schemaName: string
@@ -599,18 +594,24 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
   }
 
   private async fetchAdditionalSchemaObjects(
-    client: PostgreSQLClient,
+    client: IDatabaseClient,
     databaseName: string,
-    schemaName: string
-  ): Promise<{ types: TypeInfo[]; sequences: SequenceInfo[] }> {
+    schemaName: string,
+    dbType: DatabaseType
+  ): Promise<{ types: PgTypeInfo[]; sequences: PgSequenceInfo[] }> {
+    // Only PostgreSQL has types and sequences as first-class objects
+    if (dbType !== DatabaseType.PostgreSQL) {
+      return { types: [], sequences: [] };
+    }
+
     const [typesResult, sequencesResult] = await Promise.all([
       client.executeQueryOnDatabase(databaseName, this.getTypesQuery(schemaName)),
       client.executeQueryOnDatabase(databaseName, this.getSequencesQuery(schemaName)),
     ]);
 
     return {
-      types: typesResult.rows as unknown as TypeInfo[],
-      sequences: sequencesResult.rows as unknown as SequenceInfo[],
+      types: typesResult.rows as unknown as PgTypeInfo[],
+      sequences: sequencesResult.rows as unknown as PgSequenceInfo[],
     };
   }
 
@@ -639,7 +640,7 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
     databaseName: string,
     schemaName: string,
     schemaData: SchemaObjectsCache,
-    additionalData: { types: TypeInfo[]; sequences: SequenceInfo[] }
+    additionalData: { types: PgTypeInfo[]; sequences: PgSequenceInfo[] }
   ): DatabaseTreeItem[] {
     const baseData = { connectionId, schemaName, databaseName };
 
@@ -746,7 +747,7 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
       connectionId: string;
       schemaName: string;
       databaseName: string;
-      types: TypeInfo[];
+      types: PgTypeInfo[];
     };
 
     return types.map(
@@ -759,7 +760,7 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
       connectionId: string;
       schemaName: string;
       databaseName: string;
-      sequences: SequenceInfo[];
+      sequences: PgSequenceInfo[];
     };
 
     return sequences.map(
@@ -772,7 +773,7 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
   // ============================================================================
 
   private async getTableChildren(table: TableTreeItem): Promise<DatabaseTreeItem[]> {
-    const client = this.connectionManager.getClient(table.connectionId) as PostgreSQLClient;
+    const client = this.connectionManager.getClient(table.connectionId);
 
     if (!client || client.status !== ConnectionStatus.Connected) {
       return [];
@@ -792,7 +793,7 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
   }
 
   private async getOrCacheTableInfo(
-    client: PostgreSQLClient,
+    client: IDatabaseClient,
     table: TableTreeItem
   ): Promise<TableInfo> {
     const cacheKey = `${table.connectionId}:${table.databaseName}:${table.schemaName}:${table.tableName}`;
@@ -807,7 +808,7 @@ export class ConnectionTreeDataProvider implements vscode.TreeDataProvider<Datab
   }
 
   private async getOrCacheTriggers(
-    client: PostgreSQLClient,
+    client: IDatabaseClient,
     table: TableTreeItem
   ): Promise<TriggerInfo[]> {
     const cacheKey = `${table.connectionId}:${table.databaseName}:${table.schemaName}:${table.tableName}:triggers`;
